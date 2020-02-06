@@ -1,11 +1,15 @@
 package com.bochuan.springboot.dao;
 
 import com.bochuan.springboot.modal.Room;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 import sun.tools.jconsole.JConsole;
 
@@ -19,6 +23,9 @@ import java.util.UUID;
 public class RoomDataAccessService implements RoomDao {
     @Autowired
     MongoTemplate mongoTemplate;
+
+    @Autowired
+    RedisTemplate<String, String> redisTemplate;
 
     @Override
     public UUID insertRoom(UUID uuid, Room room) {
@@ -126,13 +133,67 @@ public class RoomDataAccessService implements RoomDao {
 
     @Override
     public List<Room> selectFeaturedRooms() {
-        Query query = new Query(Criteria.where("featured").is(true));
-        return mongoTemplate.find(query, Room.class, "rooms");
+        List<Room> featuredRooms = null;
+        ObjectMapper objectMapper = new ObjectMapper();
+        // 从redis缓存中获取数据
+        String featuredRoomListJson = redisTemplate.boundValueOps("featured_rooms").get();
+        // 判断redis缓存中是否存在所要获取的数据
+        if(featuredRoomListJson == null) {
+            // redis缓存中没有，从数据库中获取
+            Query query = new Query(Criteria.where("featured").is(true));
+            featuredRooms = mongoTemplate.find(query, Room.class, "rooms");
+            // 将List集合转换成JSON格式的字符串
+            try {
+                featuredRoomListJson = objectMapper.writeValueAsString(featuredRooms);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+            // 先将数据库查询结果存入redis缓存
+            redisTemplate.boundValueOps("featured_rooms").set(featuredRoomListJson);
+            System.out.println("从数据库中获取");
+        } else {
+            System.out.println("从redis缓存中获取");
+            System.out.println(featuredRoomListJson);
+
+            try {
+                featuredRooms = objectMapper.readValue(featuredRoomListJson, new TypeReference<List<Room>>(){});
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+        }
+        return featuredRooms;
     }
 
     @Override
     public List<Room> selectAllRoom() {
-        return mongoTemplate.findAll(Room.class, "rooms");
+        List<Room> allRooms = null;
+        ObjectMapper objectMapper = new ObjectMapper();
+        // 从redis缓存中获取数据
+        String roomListJson = redisTemplate.boundValueOps("all_rooms").get();
+        // 判断redis缓存中是否存在所要获取的数据
+        if(roomListJson == null) {
+            // redis缓存中没有，从数据库中获取
+            allRooms = mongoTemplate.findAll(Room.class, "rooms");
+            // 将List集合转换成JSON格式的字符串
+            try {
+                roomListJson = objectMapper.writeValueAsString(allRooms);
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+            // 先将数据库查询结果存入redis缓存
+            redisTemplate.boundValueOps("all_rooms").set(roomListJson);
+            System.out.println("从数据库中获取");
+        } else {
+            System.out.println("从redis缓存中获取");
+            System.out.println(roomListJson);
+            try {
+                allRooms = objectMapper.readValue(roomListJson, new TypeReference<List<Room>>() {});
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
+        }
+        return allRooms;
+
     }
 
     @Override
