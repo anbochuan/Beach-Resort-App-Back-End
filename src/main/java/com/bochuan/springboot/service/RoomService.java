@@ -26,6 +26,10 @@ public class RoomService {
         this.roomDao = roomDao;
     }
 
+    public void sendMessage(String msg) {
+        roomDao.sendMessage(msg);
+    }
+
     public UUID addRoom(Room room) {
         UUID uuid = UUID.randomUUID();
         return roomDao.insertRoom(uuid, room);

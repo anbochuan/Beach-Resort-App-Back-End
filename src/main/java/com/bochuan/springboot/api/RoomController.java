@@ -22,6 +22,8 @@ public class RoomController {
 
     private RoomService roomService;
 
+    public String message = "Hello World!!";
+
     @Autowired
     // @Autowired：自动导入依赖的bean, @Autowired是根据类型（byType）进行自动装配的
     // @Autowired 注释可以对类成员变量、方法及构造函数进行标注，完成自动装配。
@@ -31,6 +33,13 @@ public class RoomController {
     // 所以 @Autowired 和 @Qualifier 结合使用时，自动注入的策略就从 byType 转变成 byName 了。
     public RoomController(RoomService roomService) {
         this.roomService = roomService;
+    }
+
+    @RequestMapping("/send")
+    @ResponseBody
+    public String mailer() {
+        roomService.sendMessage(message);
+        return "Msg ok!";
     }
 
     @PostMapping

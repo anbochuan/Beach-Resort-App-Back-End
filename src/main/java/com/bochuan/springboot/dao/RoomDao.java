@@ -20,4 +20,6 @@ public interface RoomDao {
 
     List<Room> selectFeaturedRooms();
 
+    void sendMessage(String msg);
+
 }

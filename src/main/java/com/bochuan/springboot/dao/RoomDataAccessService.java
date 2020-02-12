@@ -4,6 +4,9 @@ import com.bochuan.springboot.modal.Room;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.amqp.rabbit.annotation.RabbitHandler;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -26,6 +29,21 @@ public class RoomDataAccessService implements RoomDao {
 
     @Autowired
     RedisTemplate<String, String> redisTemplate;
+
+
+    @Autowired
+    private AmqpTemplate rabbitTemplate;
+
+    @Override
+    public void sendMessage(String msg) {
+        rabbitTemplate.convertAndSend("mailer", msg);
+    }
+
+    @RabbitHandler
+    @RabbitListener(queues = "mailer")
+    public void receiveMessage(String msg) {
+        System.out.println("收到消息: " + msg);
+    }
 
     @Override
     public UUID insertRoom(UUID uuid, Room room) {
