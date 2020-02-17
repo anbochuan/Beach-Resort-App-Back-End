@@ -2,6 +2,7 @@ package com.bochuan.springboot.api;
 
 import com.bochuan.springboot.modal.Room;
 import com.bochuan.springboot.service.RoomService;
+import com.sun.org.apache.bcel.internal.generic.RET;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -81,14 +82,29 @@ public class RoomController {
         return roomService.getFeaturedRooms();
     }
 
+    //** when integrate with Mongo **//
+//    @DeleteMapping(path = "{uuid}")
+//    public Room deleteRoomById(@PathVariable("uuid") UUID uuid) {
+//        return roomService.deleteRoomByIdMongo(uuid);
+//    }
+
+    //** when integrate with Cassandra **//
     @DeleteMapping(path = "{uuid}")
-    public Room deleteRoomById(@PathVariable("uuid") UUID uuid) {
-        return roomService.deleteRoom(uuid);
+    public UUID deleteRoomById(@PathVariable("uuid") UUID uuid) {
+        roomService.deleteRoomByIdCassandra(uuid);
+        return uuid;
     }
 
+    //** when integrate with Mongo **//
+//    @PutMapping(path = "{uuid}")
+//    public Room updateRoomById(@PathVariable("uuid") UUID uuid, @Valid @NotNull @RequestBody Room room) {
+//        return roomService.updateRoomMongo(uuid, room);
+//    }
+
+    //** when integrate with Cassandra **//
     @PutMapping(path = "{uuid}")
-    public Room updateRoomById(@PathVariable("uuid") UUID uuid, @Valid @NotNull @RequestBody Room room) {
-        return roomService.updateRoom(uuid, room);
+    public boolean updateRoomById(@PathVariable("uuid") UUID uuid, @Valid @NotNull @RequestBody Room room) {
+        return roomService.updateRoomCassandra(uuid, room);
     }
 
 }
