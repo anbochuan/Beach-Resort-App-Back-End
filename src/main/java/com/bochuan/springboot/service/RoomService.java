@@ -22,7 +22,7 @@ public class RoomService {
     // @Qualifier：当有多个同一类型的Bean时，可以用@Qualifier(“name”)来指定。与@Autowired配合使用
     // Spring 允许我们通过 @Qualifier 注释指定注入 Bean 的名称，这样就消除歧义了。
     // 所以 @Autowired 和 @Qualifier 结合使用时，自动注入的策略就从 byType 转变成 byName 了。
-    public RoomService(@Qualifier("RoomDao") RoomDao roomDao) {
+    public RoomService(@Qualifier("RoomCassandraDao") RoomDao roomDao) {
         this.roomDao = roomDao;
     }
 
@@ -32,6 +32,7 @@ public class RoomService {
 
     public UUID addRoom(Room room) {
         UUID uuid = UUID.randomUUID();
+        room.setUuid(uuid);
         return roomDao.insertRoom(uuid, room);
     }
 
@@ -54,11 +55,23 @@ public class RoomService {
         return roomDao.selectAllRoom();
     }
 
-    public Room deleteRoom(UUID uuid) {
-        return roomDao.deleteRoomById(uuid);
+    //** when integrate with mongoDB **//
+    public Room deleteRoomByIdMongo(UUID uuid) {
+        return roomDao.deleteRoomByIdMongo(uuid);
     }
 
-    public Room updateRoom(UUID uuid, Room room) {
-        return roomDao.updateRoomById(uuid, room);
+    //** when integrate with Cassandra **//
+    public void deleteRoomByIdCassandra(UUID uuid){
+        roomDao.deleteRoomByIdCassandra(uuid);
+    }
+
+    //** when integrate with mongoDB **//
+    public Room updateRoomMongo(UUID uuid, Room room) {
+        return roomDao.updateRoomByIdMongo(uuid, room);
+    }
+
+    //** when integrate with Cassandra **//
+    public boolean updateRoomCassandra(UUID uuid, Room room) {
+        return roomDao.updateRoomByIdCassandra(uuid, room);
     }
 }

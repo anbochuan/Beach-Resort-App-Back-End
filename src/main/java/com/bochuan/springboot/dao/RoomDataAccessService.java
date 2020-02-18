@@ -211,17 +211,21 @@ public class RoomDataAccessService implements RoomDao {
             }
         }
         return allRooms;
-
     }
 
     @Override
-    public Room deleteRoomById(UUID uuid) {
+    public Room deleteRoomByIdMongo(UUID uuid) {
         Query query = new Query(Criteria.where("uuid").is(uuid));
         return mongoTemplate.findAndRemove(query, Room.class, "rooms");
     }
 
     @Override
-    public Room updateRoomById(UUID uuid, Room room) {
+    public void deleteRoomByIdCassandra(UUID uuid) {
+
+    }
+
+    @Override
+    public Room updateRoomByIdMongo(UUID uuid, Room room) {
         Query query = new Query(Criteria.where("uuid").is(uuid));
         Update update = new Update();
         update.set("name", room.getName())
@@ -237,5 +241,10 @@ public class RoomDataAccessService implements RoomDao {
                 .set("pets", room.isPets())
                 .set("featured", room.isFeatured());
         return mongoTemplate.findAndModify(query, update, Room.class, "rooms");
+    }
+
+    @Override
+    public boolean updateRoomByIdCassandra(UUID uuid, Room room) {
+        return false;
     }
 }

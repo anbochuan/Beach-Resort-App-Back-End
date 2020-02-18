@@ -11,9 +11,17 @@ public interface RoomDao {
 
     List<Room> selectAllRoom();
 
-    Room deleteRoomById(UUID uuid);
+    //** when integrate with mongoDB **//
+    Room deleteRoomByIdMongo(UUID uuid);
 
-    Room updateRoomById(UUID uuid, Room room);
+    //** when integrate with cassandra **//
+    void deleteRoomByIdCassandra(UUID uuid);
+
+    //** when integrate with mongoDB **//
+    Room updateRoomByIdMongo(UUID uuid, Room room);
+
+    //** when integrate with cassandra **//
+    boolean updateRoomByIdCassandra(UUID uuid, Room room);
 
     List<Room> filterRoom(String roomType, int roomCapacity, double roomPrice,
                           double minSize, double maxSize, boolean isPets, boolean isBreakfast);
