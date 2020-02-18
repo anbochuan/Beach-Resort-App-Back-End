@@ -211,7 +211,6 @@ public class RoomDataAccessService implements RoomDao {
             }
         }
         return allRooms;
-
     }
 
     @Override
